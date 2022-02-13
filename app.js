@@ -15,18 +15,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api/movies', require('./api/movies'));
 app.use('/api/characters', require('./api/characters'));
 app.use('/api/genres', require('./api/genres'));
-app.use('/api/authentication', require('./api/authentication'));
+app.use('/api/auth', require('./api/authentication'));
 
 
 
 
 app.listen(app.get("port"), () => {
-  console.log(`Example app listening on port ${app.get("port")}`)
+  console.log(`Listening on port ${app.get("port")}`)
 
   sequelize.sync({ force: false }).then(() => {
-    console.log("Nos hemos conectado a la base de datos");
+    console.log("Connection established with the database");
   }).catch(error => {
-      console.log('Se ha producido un error', error);
+      console.log('Error', error);
   });
 
 })

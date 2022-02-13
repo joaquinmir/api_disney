@@ -4,10 +4,10 @@ const Character = require('../database/models/Character');
 const Movie = require('../database/models/Movie');
 require('../database/associations');
 const auth = require('../middleware/auth');
+const checkForMovies = require('../middleware/checkForMovies');
 
 
-router.post('/',auth(true),(req,res) => {
-    
+router.post('/',auth(true),checkForMovies,(req,res) => {
     Character.create({
         name: req.body.name,
         img: req.body.img,
@@ -18,7 +18,6 @@ router.post('/',auth(true),(req,res) => {
     .then((character) => {
         if(req.body.movies){
             req.body.movies.forEach((movie) => {
-                console.log(movie);
                 Movie.findOne({
                     where: { title: movie.title }
                 })
@@ -28,8 +27,6 @@ router.post('/',auth(true),(req,res) => {
                 .catch( (err) => res.json(err));
             });
         }
-    })
-    .then(character => {
         res.json(character);
     })
     .catch(err => {
@@ -70,7 +67,7 @@ router.delete("/:id",auth(true),(req,res) =>{
     
 });
 
-router.patch("/:id",auth(true),(req,res) =>{
+router.patch("/:id",auth(true),checkForMovies,(req,res) =>{
     Character.update({
         name: req.body.name,
         img: req.body.img,
@@ -83,27 +80,25 @@ router.patch("/:id",auth(true),(req,res) =>{
             id: req.params.id
         }
     })
-    .then(() => {
+    .then(async () => {
+        let character = await Character.findByPk(req.params.id).catch( (err) => res.json(err));
         if(req.body.movies){
-            Character.findByPk(req.params.id)
-            .then(async (character) => {
-                await character.removeMovies();
-                req.body.movies.forEach((movie) => {
-                    Movie.findOne({
-                        where: { title: movie.title }
-                    })
-                    .then( (mov) => {
-                        character.addMovie(mov);
-                    })
-                    .catch( (err) => res.json(err));
-                });
-            })
-        }
+            await character.removeMovies();
+            req.body.movies.forEach((movie) => {
+                Movie.findOne({
+                    where: { title: movie.title }
+                })
+                .then((mov) => {
+                    character.addMovie(mov);
+                })
+                .catch( (err) => res.json(err));
+            });   
+        } 
+        res.json(character);  
     })
-    .then(result => {
-        res.json(result);
-    })
-    .catch(err => res.json(err));
+    .catch(err => {
+        res.json(err);
+    });
     
 });
 

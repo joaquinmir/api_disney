@@ -5,7 +5,7 @@ const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../database/models/User');
 const sgMail = require('../services/sendgrid');
-
+const EXPIRE_TIME = "15m";
 
 router.post('/login',async (req, res) => {
     User.findOne({ where: { username: req.body.username } })
@@ -16,7 +16,7 @@ router.post('/login',async (req, res) => {
                 username: user.username
             }
 
-            const token = jwt.sign(userForToken,process.env.SECRET,{expiresIn: process.env.EXPIRE_TIME});
+            const token = jwt.sign(userForToken,process.env.SECRET,{expiresIn: EXPIRE_TIME});
             res.send(token);
         }
         else{
@@ -46,10 +46,11 @@ router.post('/register', async (req, res) => {
         try {
             sgMail.send(msg);
           } catch (err) {
-            return res.status(err.code).send(err.message);
+            return res.json(err);
         }
         res.json(user);
-    }).catch(err => {
+    })
+    .catch(err => {
         res.json(err);
     });
 })

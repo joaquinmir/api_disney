@@ -1,4 +1,5 @@
 .env
 node_modules
 requests.http
-seed.js
+seed2.js
+api/genres.js

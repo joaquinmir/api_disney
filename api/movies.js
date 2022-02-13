@@ -4,6 +4,7 @@ const Movie = require('../database/models/Movie');
 const Character = require('../database/models/Character');
 require('../database/associations');
 const auth = require('../middleware/auth');
+const checkForCharacters = require('../middleware/checkForCharacters');
 
 router.get("/",auth(false),(req,res)=>{
         
@@ -40,7 +41,7 @@ router.get("/",auth(false),(req,res)=>{
 });
 
 
-router.post('/',auth(true),(req,res) => {
+router.post('/',auth(true),checkForCharacters,(req,res) => {
      
     Movie.create({
         title: req.body.title,
@@ -61,10 +62,9 @@ router.post('/',auth(true),(req,res) => {
                 .catch( (err) => res.json(err));
             });
         }
-    })
-    .then(movie => {
         res.json(movie);
-    }).catch(err => {
+    })
+    .catch(err => {
         res.json(err);
     });
     
@@ -102,7 +102,7 @@ router.delete("/:id",auth(true),(req,res) => {
     
 })
 
-router.patch("/:id",auth(true),(req,res) =>{
+router.patch("/:id",auth(true),checkForCharacters,(req,res) =>{
     
     Movie.update({
         title: req.body.title,

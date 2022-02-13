@@ -27,7 +27,6 @@ module.exports =  function(admin){
             try{
                 if(!user.admin){
                     res.status(401).json({error: "Acces denied"});
-                    console.log("Acceso denegado");
                     return;
                 }
             }
