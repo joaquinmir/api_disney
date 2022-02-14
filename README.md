@@ -26,8 +26,8 @@ Request:
 >GET /api/movies?title=pocahontas
 
 Response:
-> HTTP/1.1 200 OK
->[
+ >HTTP/1.1 200 OK
+[
   {
     "title": "Pocahontas",
     "img": "https://static.wikia.nocookie.net/doblaje/images/6/6b/Pocahontas_1995.jpg/revision/latest/scale-to-width-down/960?cb=20200731233311&path-prefix=es",
@@ -37,7 +37,7 @@ Response:
 
 
 
-**GET a Movie example: **
+**GET a Movie example**
 
 Request: 
 
@@ -61,7 +61,7 @@ Request:
   ]
 }
 
-**POST a Movie example: **
+**POST a Movie example**
 
 Request: 
 
@@ -79,7 +79,7 @@ Response:
   "genreName": "Drama"
 }
 
-**PATCH a Movie example: **
+**PATCH a Movie example**
 
 Request: 
 
@@ -99,7 +99,7 @@ Response:
   "genreName": "Drama"
 }
 
-**DELETE a Movie example: **
+**DELETE a Movie example**
 
 Request: 
 
@@ -114,7 +114,7 @@ Response:
 
 You can filter them by name, age, weigth and movie.
 
-**GET Characters example: **
+**GET Characters example**
 
 Example: 
 
