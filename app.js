@@ -11,7 +11,6 @@ app.disable('x-powered-by');
 
 app.use('/api/movies', require('./api/movies'));
 app.use('/api/characters', require('./api/characters'));
-app.use('/api/genres', require('./api/genres'));
 app.use('/api/auth', require('./api/authentication'));
 
 
