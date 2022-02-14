@@ -4,10 +4,9 @@ const Character = require('../database/models/Character');
 const Movie = require('../database/models/Movie');
 require('../database/associations');
 const auth = require('../middleware/auth');
-const checkForMovies = require('../middleware/checkForMovies');
 
 
-router.post('/',auth(true),checkForMovies,(req,res) => {
+router.post('/',auth(true),(req,res) => {
     Character.create({
         name: req.body.name,
         img: req.body.img,
@@ -15,18 +14,23 @@ router.post('/',auth(true),checkForMovies,(req,res) => {
         weigth: req.body.weigth,
         bio: req.body.bio
     })
-    .then((character) => {
+    .then( (character) => {
         if(req.body.movies){
-            req.body.movies.forEach((movie) => {
-                Movie.findOne({
-                    where: { title: movie.title }
-                })
-                .then((mov) => {
-                    character.addMovie(mov);
-                })
-                .catch( (err) => res.json(err));
+            req.body.movies.forEach(async (movie) => {
+                const [mov] = await Movie.findOrCreate({
+                    where: { title: movie.title },
+                    defaults: {
+                        title: movie.title,
+                        img: movie.img,
+                        release_date: movie.release_date,
+                        rating: movie.rating,
+                        genreName: movie .genre
+                    }
+                });
+                character.addMovie(mov);
             });
         }
+        
         res.json(character);
     })
     .catch(err => {
@@ -38,7 +42,6 @@ router.post('/',auth(true),checkForMovies,(req,res) => {
 router.get("/:id",auth(false),(req,res) =>{
 
     Character.findByPk(req.params.id,{
-        attributes: ['name', 'img'],
         include: {
             model: Movie,
             attributes:["title"]
@@ -67,7 +70,7 @@ router.delete("/:id",auth(true),(req,res) =>{
     
 });
 
-router.patch("/:id",auth(true),checkForMovies,(req,res) =>{
+router.patch("/:id",auth(true),(req,res) =>{
     Character.update({
         name: req.body.name,
         img: req.body.img,
@@ -84,15 +87,19 @@ router.patch("/:id",auth(true),checkForMovies,(req,res) =>{
         let character = await Character.findByPk(req.params.id).catch( (err) => res.json(err));
         if(req.body.movies){
             await character.removeMovies();
-            req.body.movies.forEach((movie) => {
-                Movie.findOne({
-                    where: { title: movie.title }
-                })
-                .then((mov) => {
-                    character.addMovie(mov);
-                })
-                .catch( (err) => res.json(err));
-            });   
+            req.body.movies.forEach(async (movie) => {
+                const [mov] = await Movie.findOrCreate({
+                    where: { title: movie.title },
+                    defaults: {
+                        title: movie.title,
+                        img: movie.img,
+                        release_date: movie.release_date,
+                        rating: movie.rating,
+                        genreName: movie .genre
+                    }
+                });
+                character.addMovie(mov);
+            });
         } 
         res.json(character);  
     })

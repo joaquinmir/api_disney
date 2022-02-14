@@ -4,7 +4,7 @@ const Movie = require('../database/models/Movie');
 const Character = require('../database/models/Character');
 require('../database/associations');
 const auth = require('../middleware/auth');
-const checkForCharacters = require('../middleware/checkForCharacters');
+
 
 router.get("/",auth(false),(req,res)=>{
         
@@ -41,8 +41,7 @@ router.get("/",auth(false),(req,res)=>{
 });
 
 
-router.post('/',auth(true),checkForCharacters,(req,res) => {
-     
+router.post('/',auth(true),(req,res) => {
     Movie.create({
         title: req.body.title,
         img: req.body.img,
@@ -50,21 +49,27 @@ router.post('/',auth(true),checkForCharacters,(req,res) => {
         rating: req.body.rating,
         genreName: req.body.genre
     })
-    .then((movie) => {
+    .then( (movie) => {
         if(req.body.characters){
-            req.body.characters.forEach((character) => {
-                Character.findOne({
-                    where: { name: character.name }
-                })
-                .then((char) => {
-                    movie.addCharacter(char);
-                })
-                .catch( (err) => res.json(err));
+            req.body.characters.forEach(async (character) => {
+                const [char] = await Character.findOrCreate({
+                    where: { name: character.name },
+                    defaults:{
+                        name: character.name,
+                        img: character.img,
+                        age: character.age,
+                        weigth: character.weigth,
+                        bio: character.bio
+                    }
+                });
+                movie.addCharacter(char);
             });
         }
+        
         res.json(movie);
     })
     .catch(err => {
+        
         res.json(err);
     });
     
@@ -102,38 +107,42 @@ router.delete("/:id",auth(true),(req,res) => {
     
 })
 
-router.patch("/:id",auth(true),checkForCharacters,(req,res) =>{
-    
+router.patch("/:id",auth(true),(req,res) =>{
     Movie.update({
         title: req.body.title,
         img: req.body.img,
         release_date: req.body.release_date,
-        rating: req.body.rating
+        rating: req.body.rating,
+        genreName: req.body.genre
+        
     }, {
         where: {
             id: req.params.id
         }
     })
-    .then(() => {
+    .then(async () => {
+        let movie = await Movie.findByPk(req.params.id).catch( (err) => res.json(err));
         if(req.body.characters){
-            Movie.findByPk(req.params.id)
-            .then(async (movie) => {
-                await movie.removeCharacters();
-                req.body.characters.forEach((character) => {
-                    Character.findOne({
-                        where: { name: character.name }
-                    })
-                    .then((char) => {
-                        movie.addCharacter(char);
-                    })
-                    .catch( (err) => res.json(err));
+            await movie.removeCharacters();
+            req.body.characters.forEach(async (character) => {
+                const [char] = await Character.findOrCreate({
+                    where: { name: character.name },
+                    defaults:{
+                        name: character.name,
+                        img: character.img,
+                        age: character.age,
+                        weigth: character.weigth,
+                        bio: character.bio
+                    }
                 });
-            })
-    }})
-    .then(result => {
-        res.json(result);
+                movie.addCharacter(char);
+            });
+        } 
+        res.json(movie);  
     })
-    .catch(err => res.json(err));
+    .catch(err => {
+        res.json(err);
+    });
     
 });
 

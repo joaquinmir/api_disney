@@ -3,6 +3,8 @@ const bcryptjs = require('bcryptjs');
 const User = require('./database/models/User');
 require('./database/associations');
 
+// execute this if you want to create an admin user 
+
 sequelize.sync({ force: false })
 .then(() => {
     

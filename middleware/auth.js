@@ -2,7 +2,8 @@ const User = require('../database/models/User');
 const jwt = require('jsonwebtoken');
 
 module.exports =  function(admin){
-    return async (req,res,next) => { 
+    return async (req,res,next) => {
+
         let authorization = req.get('authorization');
         let token="";
 
